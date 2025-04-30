@@ -16,8 +16,8 @@ class BaseScraper(SetupDriver):
     """
 
     def __init__(self, url: str):
-        super().__init__(url=url, selenoid=True, headless=False)
-        self.driver = super().setup(host=settings.HOST, name=settings.NAME)
+        super().__init__(url=url, selenoid=settings.USE_SELENOID, headless=settings.USE_HEADLESS)
+        self.driver = super().setup(host=settings.HOST, name=settings.NAME_APP)
         self.start_driver()
 
     def close(self):

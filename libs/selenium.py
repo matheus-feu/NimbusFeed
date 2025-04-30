@@ -32,7 +32,7 @@ class SetupDriver:
             lambda a: self.driver.execute_script("return document.readyState==\"complete\";"))
         time.sleep(tm)
 
-    def wait_web_driver(self, tm: int = 5) -> WebDriverWait:
+    def  wait_web_driver(self, tm: int = 5) -> WebDriverWait:
         return WebDriverWait(self.driver, tm, poll_frequency=1,
                              ignored_exceptions=[
                                  NoSuchElementException,
@@ -43,6 +43,10 @@ class SetupDriver:
 
     def wait_xpath(self, path: str, tm=20) -> webdriver:
         element = self.wait_web_driver(tm).until(EC.visibility_of_element_located((By.XPATH, path)))
+        return element
+
+    def wait_element(self, by: str, value: str, tm=20) -> webdriver:
+        element = self.wait_web_driver(tm).until(EC.visibility_of_element_located((by, value)))
         return element
 
     def start_driver(self) -> webdriver:
