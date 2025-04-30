@@ -1,5 +1,9 @@
+from requests.exceptions import RequestException
+from selenium.common.exceptions import WebDriverException
 from selenium.webdriver.common.by import By
+from tenacity import *
 
+from api.logger import app_logger
 from scraping.rpa.base import BaseScraper
 from scraping.schemas.weather_schema import WeatherForecastSchema
 
@@ -48,7 +52,21 @@ class PrevisaoScraper(BaseScraper):
     def extract_default_data(self, default):
         return default.find_element(By.CLASS_NAME, "_flex").text.strip()
 
+    @retry(
+        stop=stop_after_attempt(3),
+        wait=wait_fixed(2),
+        retry=retry_if_exception_type((WebDriverException, RequestException, Exception))
+    )
     def extract_data(self):
+        """
+        Extracts weather data from the page.
+
+        3 attempts to load the page and extract data.
+        Wait for 2 seconds between attempts.
+        Retry if an exception occurs.
+
+        :return: WeatherForecastSchema object with the extracted data.
+        """
         self.wait_loads()
 
         try:
@@ -78,7 +96,8 @@ class PrevisaoScraper(BaseScraper):
                     method = key_to_method.get(key, self.extract_default_data)
                     value = method(variable)
                     data[key] = value
-                except Exception:
+                except Exception as e:
+                    app_logger.error(f"Erro ao extrair dados da variável: {key}. Erro: {e}")
                     continue
 
             return WeatherForecastSchema(
@@ -90,5 +109,6 @@ class PrevisaoScraper(BaseScraper):
                 sun=data.get("Sol"),
                 rainbow=data.get("Previsão de arco-íris")
             )
-        except Exception:
+        except Exception as e:
+            app_logger.error(f"Erro ao extrair dados: {e}")
             return None

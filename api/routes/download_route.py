@@ -1,12 +1,9 @@
-import csv
-from io import StringIO
-
 from fastapi import APIRouter, Depends
-from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session
 
 from api.db.session import get_db
 from api.models.weather import CityWeather, WeatherForecast
+from api.utils import generate_and_save_csv
 
 router = APIRouter()
 
@@ -20,9 +17,7 @@ def generate_city_weather_csv_report(db: Session = Depends(get_db)):
     """
     weather_data = db.query(CityWeather).all()
 
-    output = StringIO()
-    writer = csv.writer(output)
-    writer.writerow([
+    columns = [
         "Cidade",
         "País",
         "Temperatura",
@@ -38,9 +33,10 @@ def generate_city_weather_csv_report(db: Session = Depends(get_db)):
         "Nascer do Sol",
         "Pôr do Sol",
         "Fuso Horário"
-    ])
-    for weather in weather_data:
-        writer.writerow([
+    ]
+
+    rows = [
+        [
             weather.city,
             weather.country,
             weather.temperature,
@@ -56,15 +52,10 @@ def generate_city_weather_csv_report(db: Session = Depends(get_db)):
             weather.sunrise,
             weather.sunset,
             weather.timezone,
-        ])
-
-    output.seek(0)
-
-    return StreamingResponse(
-        output,
-        media_type="text/csv",
-        headers={"Content-Disposition": "attachment; filename=city_weather_report.csv"}
-    )
+        ]
+        for weather in weather_data
+    ]
+    return generate_and_save_csv(rows, columns, "city_weather_report.csv")
 
 
 @router.get("/report/weather_forecast/csv")
@@ -76,9 +67,7 @@ def generate_weather_forecast_csv_report(db: Session = Depends(get_db)):
     """
     forecast_data = db.query(WeatherForecast).all()
 
-    output = StringIO()
-    writer = csv.writer(output)
-    writer.writerow([
+    columns = [
         "Cidade",
         "Temperatura",
         "Chuva",
@@ -86,9 +75,10 @@ def generate_weather_forecast_csv_report(db: Session = Depends(get_db)):
         "Umidade",
         "Sol",
         "Arco-Íris"
-    ])
-    for forecast in forecast_data:
-        writer.writerow([
+    ]
+
+    rows = [
+        [
             forecast.city,
             forecast.temperature,
             forecast.rain,
@@ -96,12 +86,7 @@ def generate_weather_forecast_csv_report(db: Session = Depends(get_db)):
             forecast.humidity,
             forecast.sun,
             forecast.rainbow
-        ])
-
-    output.seek(0)
-
-    return StreamingResponse(
-        output,
-        media_type="text/csv",
-        headers={"Content-Disposition": "attachment; filename=weather_forecast_report.csv"}
-    )
+        ]
+        for forecast in forecast_data
+    ]
+    return generate_and_save_csv(rows, columns, "weather_forecast_report.csv")

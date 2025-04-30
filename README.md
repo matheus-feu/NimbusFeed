@@ -3,6 +3,9 @@
 O NimbusFeed é um sistema de coleta e disponibilização de dados meteorológicos que combina web scraping e integração com
 APIs de previsão do tempo.
 
+
+[Assista ao vídeo aqui](https://files.fm/f/4scm9gdakr)
+
 ## 📋 Pré-requisitos
 
 - Python 3.13
