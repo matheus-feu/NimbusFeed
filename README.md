@@ -82,6 +82,7 @@ O projeto requer as seguintes variáveis de ambiente no arquivo `.env`:
 
 
 3. Acesse a aplicação em `http://localhost:8000/docs`
+![image](https://github.com/user-attachments/assets/59ed4dde-7614-4ac8-a154-e3e2f24d9723)
 
 ## 📁 Estrutura do Projeto
 
